@@ -1,0 +1,11 @@
+
+The goal of my game is to have the character shoot at the target with a projectile which is a small ball he is holding in his hand. 
+
+The user should use the left and right arrows to move left or right and once the character is at the right spot to shoot, the "H" key is used to rotate his arm upwards and the “G” key is used to rotate his arm downwards, in order to shoot at the target. To release the projectile, the "M" key is pressed several times until it is close enough to the target. If the user wants to bring the projectile back to his hand, the "N" key can be pressed. If the target is considered as shot, the target reappears in a different spot (random) and the projectile goes back to the character's hand.
+
+There are some flaws in the game that I wish I had the time to correct. The distance that the projectile is required to be from the target in order to have a win is too long. So the shot can be very far from the target and it would still work. If I had more time I would also allow the user to change the position of the camera in a realistic way by pressing a key.
+
+It was time consuming to figure out how to block the rotation of the arm and to calculate the y and z position of the projectile after the rotation. If I were to do this project again, I would focus more on the end goal of my game. 
+
+(Note: Please run the program with Safari)
+

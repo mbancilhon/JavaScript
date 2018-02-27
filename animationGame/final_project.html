@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<head>
+<title>Final Project</title>
+<script src="three.min.js"></script>
+<script src="KeyboardState.js"></script>
+
+
+<!--Adapted from the blog post:
+    http://solutiondesign.com/blog/-/blogs/webgl-and-three-js-texture-mappi-1/-->
+
+<script>
+    var scene, camera, renderer; // Three.js rendering basics.
+
+    var canvas; // The canvas on which the image is rendered.
+
+    var floor;
+    var wall;
+   
+    var keyboard = new KeyboardState();
+
+    //projectile
+    var object;
+ //target
+    var target
+
+    //body parts
+    var core;
+    var upperLeft;
+    var upperRight;
+    var lowerLeft;
+    var upperRight;
+
+    var upperLegLeft;
+    var upperLegRight;
+    var lowerLegLeft;
+    var upperLegRight;
+
+    //containers
+    var arm;
+    var lowerArm;
+
+    var armRight;
+    var lowerArmRight;
+
+    var leg;
+    var lowerLeg;
+
+    var leg_Left;
+    var lowerLeg_Left;
+
+    var objectContainer;
+
+    //rotation
+    var counter=1;
+    var max= 10;
+
+   var theta= Math.PI/60;
+   var countH=0;
+   var countG=0;
+   var countM=0;
+   var sumTheta=0;
+   var totalCount;
+   var dx;
+   var dy;
+   var dz;
+
+   var objectPositionY=0;
+   var objectPositionX=0;
+   var objectPositionZ=0;
+
+   var targetPos_z;
+   var targetPos_y;
+   var targetPos_x;
+
+
+
+
+
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(70, canvas.width/canvas.height, 1, 1000);
+
+        var light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 30, -10, 20 );
+        scene.add(light);
+
+        // directional light
+        dirLight = new THREE.DirectionalLight("white", 1);
+        dirLight.position.set(20, 15, 20);
+        scene.add(dirLight);
+
+         // directional light
+        dirLight2 = new THREE.DirectionalLight("white", 1);
+        dirLight2.position.set(15, 10, 0);
+         dirLight2.rotation.z= Math.PI/2;
+        scene.add(dirLight2);
+    
+        var material= new THREE.MeshPhongMaterial( {ambient: "green", color: "blue", specular: "green", shininess:5});
+
+        //------CHARACTER-------
+
+// Initializing containers
+        arm = new THREE.Object3D();
+        lowerArm = new THREE.Object3D();
+        scene.add(arm);
+        arm.rotation.y= Math.PI;
+
+        scene.add(lowerArm);
+
+
+        armRight = new THREE.Object3D();
+        lowerArmRight= new THREE.Object3D();
+        scene.add(armRight);
+        armRight.rotation.y= Math.PI;
+
+        scene.add(lowerArmRight);
+
+        leg = new THREE.Object3D();
+        lowerLeg = new THREE.Object3D();
+        scene.add(leg);
+        leg.rotation.y= Math.PI;
+        scene.add(lowerLeg);
+
+        leg_Left = new THREE.Object3D();
+        lowerLeg_Left = new THREE.Object3D();
+        scene.add(leg_Left);
+        leg_Left.rotation.y= Math.PI/20;
+        leg_Left.rotation.z= -Math.PI/6;
+        leg_Left.rotation.x= -Math.PI/20;
+         leg_Left.position.x-=1.5;
+        leg_Left.position.y+=0.75;
+
+        leg_Left.position.z+=0;
+
+
+
+        scene.add(lowerLeg_Left);
+
+
+        var loader= new THREE.JSONLoader();
+
+            loader.load('man_core.json', function(geometry){
+            core= new THREE.Mesh(geometry, material);
+          //  core.position.z+=0;
+            core.position.y+=5;
+            core.rotation.y= Math.PI;
+            scene.add(core);
+  });
+            loader.load('man_upperLeft.json', function(geometry){
+            upperLeft= new THREE.Mesh(geometry, material);
+            arm.position.y+=5;
+           upperLeft.position.y-=5;
+            //add upperLeft to arm container 
+            arm.add(upperLeft);
+ });
+            loader.load('man_upperRight.json', function(geometry){
+            upperRight= new THREE.Mesh(geometry, material);
+          //  upperRight.position.z=-10;
+           // scene.add(upperrRight);
+           armRight.position.y+=5;
+           upperRight.position.y-=5;
+           armRight.add(upperRight);
+
+ });
+            loader.load('man_lowerLeft.json', function(geometry){
+            lowerLeft= new THREE.Mesh(geometry, material);
+             lowerLeft.position.y-=5;
+              lowerArm.position.y-=2;
+              lowerLeft.position.y+=2;
+
+            //add lowerLeft to lower arm container
+            lowerArm.add(lowerLeft);
+
+ });
+            loader.load('man_lowerRight.json', function(geometry){
+            lowerRight= new THREE.Mesh(geometry, material);
+              lowerRight.position.y-=5;
+              lowerArmRight.position.y-=2;
+              lowerRight.position.y+=2;
+              lowerArmRight.add(lowerRight);
+ });
+            loader.load('man_upperLegLeft.json', function(geometry){
+            upperLegLeft= new THREE.Mesh(geometry, material);
+           leg_Left.add(upperLegLeft);
+ });
+            loader.load('man_upperLegRight.json', function(geometry){
+            upperLegRight= new THREE.Mesh(geometry, material);
+            leg.add(upperLegRight);
+ });
+            loader.load('man_lowerLegLeft.json', function(geometry){
+            lowerLegLeft= new THREE.Mesh(geometry, material);
+
+          lowerLeg_Left.add(lowerLegLeft);
+ });
+            loader.load('man_lowerLegRight.json', function(geometry){
+            lowerLegRight= new THREE.Mesh(geometry, material);
+
+            lowerLeg.add(lowerLegRight);
+
+        }); 
+        //left arm
+        arm.add(lowerArm);
+        arm.position.y+=5;
+
+        //right arm
+        armRight.add(lowerArmRight);
+        armRight.position.y+=5;
+        armRight.position.z=0;
+
+
+        //right leg
+        leg.add(lowerLeg);
+        leg.position.y+=5;
+
+
+        //left leg
+        leg_Left.add(lowerLeg_Left);
+        leg_Left.position.y+=5;
+
+
+        
+
+
+        //------SCENE-------
+
+        var geometrySideWall = new THREE.PlaneGeometry( 100, 50 );
+        var texture = THREE.ImageUtils.loadTexture( 'tapestry_4.jpg' );
+
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 2, 3); // twice in u and three times in v
+        var tapestryMaterial = new THREE.MeshPhongMaterial( { map: texture } );
+
+        sideWall = new THREE.Mesh( geometrySideWall, tapestryMaterial );
+        var theta= -Math.PI/2;
+        sideWall.rotation.y= -theta;
+        sideWall.position.x-=25; 
+        sideWall.position.y+=10; 
+        sideWall.position.z-=50; 
+        scene.add( sideWall);
+
+
+        var stoneTexture = THREE.ImageUtils.loadTexture("stone_5.jpg");
+        var stoneMaterial = new THREE.MeshPhongMaterial( { map: stoneTexture } );
+
+        var geometryWall = new THREE.PlaneGeometry( 70, 50 );
+        wall = new THREE.Mesh( geometryWall, stoneMaterial );
+        wall.position.y+=10; 
+        wall.position.z-=100; 
+        scene.add( wall);
+
+       //-----PROJECTILE-------
+               objectContainer = new THREE.Object3D();
+              scene.add(objectContainer);
+
+
+            loader.load('projectile.json', function(geometry){
+            object= new THREE.Mesh(geometry, material);
+
+            object.position.y-=2;
+
+            objectContainer.add(object);
+        }); 
+
+        lowerArmRight.add(objectContainer);
+
+       //-----TARGET-------
+            loader.load('object.json', function(geometry){
+            target= new THREE.Mesh(geometry, material);
+            targetPos_z= -10;
+            targetPos_y= 10;
+            targetPos_x=0;
+            target.position.z=targetPos_z;
+            target.position.y= targetPos_y;
+
+            scene.add(target);
+        }); 
+
+
+    }
+
+    function update() {
+        keyboard.update();
+
+        if ( keyboard.pressed("left") ) {
+            arm.position.x -= 0.1;
+            armRight.position.x -= 0.1;
+            core.position.x -= 0.1;
+            leg.position.x -= 0.1;
+            leg_Left.position.x -= 0.1;
+            camera.position.x-=0.1;
+            objectPositionX= objectPositionX-0.1;
+
+        }
+        if ( keyboard.pressed("right") ) {
+            arm.position.x += 0.1;
+            armRight.position.x += 0.1;
+            core.position.x += 0.1;
+            leg.position.x += 0.1;
+            leg_Left.position.x += 0.1;
+            camera.position.x+=0.1;
+            objectPositionX= objectPositionX+0.1;
+
+        }
+ 
+        if (keyboard.pressed("H")){
+
+
+           if ( sumTheta<Math.PI/2) {
+              countH=countH+1;
+              sumTheta= countH*theta;
+              armRight.rotation.x+= theta; 
+
+               dz= 2-(2* (Math.cos(sumTheta)));
+               dy= 2* (Math.sin(sumTheta));
+
+              objectPositionY= dy-5; //-5 is the initial y pos 
+              objectPositionZ= dz;   
+            }
+            else if (sumTheta>=Math.PI/2){
+              countH=0;
+            }
+
+        }
+
+       if (keyboard.pressed("G")){
+
+           if ( sumTheta<=Math.PI/2 && sumTheta>0) {
+               armRight.rotation.x-= theta;
+               countG= countG+1;
+               sumTheta= sumTheta-theta; //going in the other direction decreases angle
+
+               dz= 2-(2* (Math.cos(sumTheta)));
+               dy= 2* (Math.sin(sumTheta));
+
+              objectPositionY= dy-5;  //-5 is the initial y pos
+              objectPositionZ= dz;
+
+            }
+          else if (sumTheta<=0){
+            countG=0;
+           }
+
+        }
+
+      if (keyboard.pressed("M")){
+          objectContainer.position.y-=0.3;
+          objectPositionY=objectPositionY+0.3;
+          objectPositionZ=objectPositionZ-0.3;
+          countM= countM+1;
+        } 
+      if (keyboard.pressed("N")){
+          objectContainer.position.y+=countM*0.3;
+          objectPositionY=objectPositionY-(countM*0.3);
+          objectPositionZ=objectPositionZ+(countM*0.3);
+          countM=0;
+       }
+
+
+    console.log("objectY ="+objectPositionY+ "     objectX ="+objectPositionX+"    objectZ ="+objectPositionZ);
+    console.log("targetY ="+targetPos_y+ "     targetX ="+targetPos_x+"    targetZ ="+targetPos_z);
+  
+      if (objectPositionY-targetPos_y<2 && objectPositionX-targetPos_x<2
+        && (objectPositionZ*2)-targetPos_z<2) {
+          console.log("touched");
+          targetPos_y= Math.random()*10;
+          target.position.y= targetPos_y;
+          targetPos_x=Math.random()*10;
+          target.position.x=targetPos_x;
+          objectContainer.position.y+=countM*0.3;
+          objectPositionY=objectPositionY-(countM*0.3);
+          objectPositionZ=objectPositionZ+(countM*0.3);
+          countM=0;
+      }
+    }
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        requestAnimationFrame( render );
+
+       camera.position.z = 20;
+       camera.position.x = 2;
+       camera.position.y = 8;
+
+        renderer.render(scene, camera);
+
+       update();
+
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+    
+        // create world and render scene
+        createWorld();
+        render();
+
+        update();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="1000" height="800"></canvas>
+</div>
+</body>
+</html>
