@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<head>
+<title>Phases of the Moon</title>
+<script src="three.min.js"></script>
+
+<script>
+    var scene, camera, renderer;  // Three.js rendering basics.
+
+    var canvas;  // The canvas on which the image is rendered.
+
+    var dirLight; // Our directional light is global so we can change its position.
+    var angle;    // The angle (about the y-axis) of the directional light.
+    var moonContainer;
+    var earthContainer;
+    var pointLight;
+    var ambientLight;
+
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(45, canvas.width/canvas.height, 0.1, 1000);
+
+        // ambient light
+        ambientLight = new THREE.AmbientLight("blue");
+        scene.add(ambientLight);
+
+        // point light
+        pointLight = new THREE.PointLight("white", 10, 100);
+        pointLight.position.set( 0, 0, 0 );
+        scene.add(pointLight);
+        scene.add(new THREE.PointLightHelper(pointLight, 10));
+
+        // directional light
+        dirLight = new THREE.DirectionalLight("white", 1);
+        dirLight.position.set(100, 200, 100);
+        //scene.add(dirLight);
+
+        dirLightSun = new THREE.DirectionalLight("orange", 1);
+        dirLightSun.position.set(0, 0, 1);
+        scene.add(dirLightSun);
+
+        dirLightSun2 = new THREE.DirectionalLight("orange", 1);
+        dirLightSun2.position.set(0, 1, 1);
+        scene.add(dirLightSun2);
+
+
+
+
+        //Initialize parts of solar system and add them to the scene
+        earthContainer= new THREE.Object3D();
+
+        moonContainer= new THREE.Object3D();
+        scene.add(earthContainer);
+        scene.add(moonContainer);
+
+       //set up moon geometry
+        var sphereGeometryMoon = new THREE.SphereGeometry(10,50, 50);
+        var sphereMaterialMoon = new THREE.MeshLambertMaterial({ color: "grey" });
+        var moon = new THREE.Mesh(sphereGeometryMoon, sphereMaterialMoon);
+
+        // add the moon to the scene
+      //  scene.add(moon); 
+        moon.position.x=50;
+
+        //add moon to moonContainer
+        moonContainer.add(moon);
+        moonContainer.position.x=100;
+
+
+        // set up earth geometry
+        var sphereGeometryEarth = new THREE.SphereGeometry(25,50, 50);
+        var sphereMaterialEarth = new THREE.MeshLambertMaterial({ color: "green" });
+        var earth = new THREE.Mesh(sphereGeometryEarth, sphereMaterialEarth);
+
+        // add the earth to the scene
+      //  scene.add(earth); 
+        earth.position.x+=100;
+
+        //add earth and moon to container
+        earthContainer.add(earth);
+        earthContainer.add(moonContainer);
+
+        // create the sphere's material
+        var sphereGeometrySun = new THREE.SphereGeometry(50, 16, 16);
+        var sphereMaterialSun = new THREE.MeshLambertMaterial({ color: "yellow"});
+        //
+        var sun = new THREE.Mesh(sphereGeometrySun, sphereMaterialSun);
+
+        // add the sun to the scene
+        scene.add(sun); 
+
+
+
+        camera.position.y=-60;
+        camera.position.z=425;
+        camera.position.x=20;
+        camera.rotation.z-=0.25;
+     //  camera.rotation.x+=0.25;
+
+
+
+}
+
+    // Render the scene. This is called for each frame of the animation.
+    angle = 0;
+    function render() {
+        requestAnimationFrame( render );
+
+      //  dirLight.position.x = Math.cos(angle);
+      //  dirLight.position.z = Math.sin(angle);
+      //  dirLight.position.y = Math.sin(angle);
+
+        angle += 0.01;
+
+
+        earthContainer.rotation.y+= 0.0125;
+
+        moonContainer.rotation.y+= 0.025;
+
+
+
+        renderer.render(scene, camera);
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+    
+        // create world and render scene
+        createWorld();
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="1000" height="800"></canvas>
+</div>
+</body>
+</html>
