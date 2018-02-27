@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<head>
+<title>Walking through the pyramids</title>
+<script src="three.min.js"></script>
+
+
+<script>
+    var scene, camera, renderer; // Three.js rendering basics.
+
+    var canvas; // The canvas on which the image is rendered.
+
+    // world and animation parameters
+    var numPyramids = 100;
+    var worldSize = 100; // define world as the xz plane from -20 to 20 in each direction
+    var forward = true;  // if true, move forward, if false, turn
+    var b;               // for turning right or left
+    var turnCounter = 0;       // 
+
+    //----------------------------------------------------------------------------------
+
+    // Returns a random number between min (inclusive) and max (exclusive)
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    //----------------------------------------------------------------------------------
+
+    function makePyramid(cx,cy,cz,height) {
+        // set up the geometry for our pyramid
+        var pyramidGeom = new THREE.Geometry();
+        var halfSide = height/2;
+    
+        pyramidGeom.vertices = [  // array of Vector3 giving vertex coordinates
+            new THREE.Vector3( cx+halfSide, cy, cz+halfSide ),    // vertex number 0
+            new THREE.Vector3( cx+halfSide, cy, cz-halfSide ),   // vertex number 1
+            new THREE.Vector3( cx-halfSide, cy, cz-halfSide ),  // vertex number 2
+            new THREE.Vector3( cx-halfSide, cy, cz+halfSide ),   // vertex number 3
+            new THREE.Vector3( cx, cy+height, cz )     // vertex number 4
+        ];
+        
+        pyramidGeom.faces = [  // array of Face3 giving the triangular faces
+            new THREE.Face3( 3, 2, 1),  // one half of the bottom face
+            new THREE.Face3( 3, 1, 0),  // second half of the bottom face
+            new THREE.Face3( 3, 0, 4),  // remaining faces are the four sides
+            new THREE.Face3( 0, 1, 4),
+            new THREE.Face3( 1, 2, 4),
+            new THREE.Face3( 2, 3, 4)
+        ];
+    
+        pyramidGeom.computeFaceNormals();
+    
+        pyramidGeom.faces[0].materialIndex = 0;
+        for (var i = 1; i <= 5; i++) {
+            pyramidGeom.faces[i].materialIndex = i-1;
+        }
+    
+        // Creates a material for the pyramid that is "matte" not "shiny".
+        var pyramidFaceMaterial = new THREE.MeshFaceMaterial( [
+            new THREE.MeshLambertMaterial( { color: 0xffffff, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0x99ffff, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0xff99ff, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0xffff99, shading: THREE.FlatShading } ),
+            new THREE.MeshLambertMaterial( { color: 0xff9999, shading: THREE.FlatShading } )
+        ] );
+    
+        // Create the pyramid using the geometry and materials we've set up.
+        pyramid = new THREE.Mesh( pyramidGeom, pyramidFaceMaterial ); 
+        scene.add(pyramid);
+    }
+
+    //----------------------------------------------------------------------------------
+    
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+    
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(40, canvas.width/canvas.height, 1, 50);
+        camera.position.set(0,1,worldSize/2); // put camera in the middle of the world
+    
+        // create some lights and add them to the scene.
+        scene.add( new THREE.DirectionalLight( 0xffffff, 0.4 ) ); // dim light shining from above
+        var viewpointLight = new THREE.DirectionalLight( 0xffffff, 0.8 );  // a light to shine in the direction the camera faces
+        viewpointLight.position.set(0,0,1);  // shines down the z-axis
+        scene.add(viewpointLight);
+
+        // add a plane for the ground, rotated 90 deg in the x direction
+        var geometry = new THREE.PlaneGeometry(worldSize, worldSize) ;
+        var material = new THREE.MeshBasicMaterial({color: "pink", side: THREE.DoubleSide});
+        var plane = new THREE.Mesh( geometry, material );
+        plane.rotation.x = Math.PI/2;
+        scene.add(plane);
+
+        // add pyramids
+        for (var i=0; i < numPyramids; i++) {
+            var cx = getRandomArbitrary(-worldSize/2+1,worldSize/2-1);
+            var cz = getRandomArbitrary(-worldSize/2+1,worldSize/2-1);
+            var height = getRandomArbitrary(0.5,3);
+            makePyramid(cx,0,cz,height);
+        }
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        requestAnimationFrame( render );
+
+        var r = Math.random();
+        if (r > 0.995) {
+            forward = false;  // set turning mode
+            turnCounter = 0;  // reset the turn counter
+        }
+
+        // move forward
+        if (forward) {
+            camera.position.x += -0.1*Math.sin(camera.rotation.y);
+            camera.position.z += -0.1*Math.cos(camera.rotation.y);
+
+        // turn slightly and then continue forward
+        } else {
+            if (turnCounter == 0) {
+                b = Math.random(); // random number to turn left or right
+            }
+            if (b > 0.5) {
+                camera.rotation.y -= 0.01; // turn right
+            } else {
+                camera.rotation.y += 0.01; // turn left
+            }
+            turnCounter += 1;
+
+            // start moving forward again
+            if (turnCounter == 100) {
+                forward = true; 
+            }
+        }
+
+        // if we are off the world, back up and initiate a turn
+        if (Math.abs(camera.position.x) >= worldSize/2 || Math.abs(camera.position.z) >= worldSize/2) {
+            camera.position.x += Math.sin(camera.rotation.y);
+            camera.position.z += Math.cos(camera.rotation.y);
+            forward = false;
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+    
+        // create world and render scene
+        createWorld();
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="300"></canvas>
+</div>
+</body>
+</html>
