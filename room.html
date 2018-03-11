@@ -69,8 +69,7 @@
         cube = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial(materials));
         cube.position.z = -25;
         cube.rotation.set(0.4,-0.8,0); 
-      //  scene.add(cube);
-
+        
         // set up the geometry for our pyramid
         var octaGeom = new THREE.Geometry();
     
@@ -110,16 +109,7 @@
                         new THREE.Vector2(1, 1),   // 2
                         new THREE.Vector2(0.5, 1), // 3
                         new THREE.Vector2(0, 1)];  // 4
-                        
-
-        // bottom face
-        // bottom face
-      //   octaGeom.faceVertexUvs[0].push([uvcoords[0], uvcoords[1], uvcoords[2]]);
-      //   octaGeom.faceVertexUvs[0].push([uvcoords[0], uvcoords[2], uvcoords[4]]);
-      //  octaGeom.faceVertexUvs[0].push([uvcoords[0]]);
-      //  octaGeom.faceVertexUvs[0].push([uvcoords[1]]);
-
-        
+                         
         // side faces
         for (var i=0; i < 4; i++) {
             octaGeom.faceVertexUvs[0].push([uvcoords[0], uvcoords[1], uvcoords[4]]);
@@ -131,18 +121,12 @@
             octaGeom.faceVertexUvs[0].push([uvcoords[4], uvcoords[0], uvcoords[1]]);
             octaGeom.faceVertexUvs[0].push([uvcoords[4], uvcoords[2], uvcoords[0]]);
             octaGeom.faceVertexUvs[0].push([uvcoords[2], uvcoords[4], uvcoords[0]]);
-
-
-
-
         }
 
         octa = new THREE.Mesh( octaGeom, checkerboardMaterial);
         octa.rotation.set(0.4,-0.8,0); 
         octa.position.z = -3;
         scene.add(octa);
-
-
 
         var geometryFloor = new THREE.PlaneGeometry( 10, 10 );
         floor = new THREE.Mesh(geometryFloor, woodMaterial);
@@ -154,8 +138,6 @@
 
         var geometrySideWall = new THREE.PlaneGeometry( 10, 10 );
         var texture = THREE.ImageUtils.loadTexture( 'tapestry_4.jpg' );
-
-        //var tapestryTexture = THREE.ImageUtils.loadTexture("tapestry.jpg");
 
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -181,17 +163,12 @@
     // Render the scene. This is called for each frame of the animation.
     function render() {
         requestAnimationFrame( render );
-
-        //cube.rotation.x += .04;
-        //cube.rotation.y += .02;
-
+        
           octa.rotation.x = .04;
           octa.position.z = -10;
           octa.position.y = 3;
 
-
-     // octa.rotation.x += .04;
-      octa.rotation.y -= .02;
+        octa.rotation.y -= .02;
 
        camera.rotation.y = Math.PI/4;
 
