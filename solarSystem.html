@@ -48,9 +48,6 @@
         dirLightSun2.position.set(0, 1, 1);
         scene.add(dirLightSun2);
 
-
-
-
         //Initialize parts of solar system and add them to the scene
         earthContainer= new THREE.Object3D();
 
@@ -64,13 +61,11 @@
         var moon = new THREE.Mesh(sphereGeometryMoon, sphereMaterialMoon);
 
         // add the moon to the scene
-      //  scene.add(moon); 
         moon.position.x=50;
 
         //add moon to moonContainer
         moonContainer.add(moon);
         moonContainer.position.x=100;
-
 
         // set up earth geometry
         var sphereGeometryEarth = new THREE.SphereGeometry(25,50, 50);
@@ -78,7 +73,6 @@
         var earth = new THREE.Mesh(sphereGeometryEarth, sphereMaterialEarth);
 
         // add the earth to the scene
-      //  scene.add(earth); 
         earth.position.x+=100;
 
         //add earth and moon to container
@@ -100,29 +94,19 @@
         camera.position.z=425;
         camera.position.x=20;
         camera.rotation.z-=0.25;
-     //  camera.rotation.x+=0.25;
-
-
-
 }
 
     // Render the scene. This is called for each frame of the animation.
     angle = 0;
     function render() {
         requestAnimationFrame( render );
-
-      //  dirLight.position.x = Math.cos(angle);
-      //  dirLight.position.z = Math.sin(angle);
-      //  dirLight.position.y = Math.sin(angle);
-
+        
         angle += 0.01;
 
 
         earthContainer.rotation.y+= 0.0125;
 
         moonContainer.rotation.y+= 0.025;
-
-
 
         renderer.render(scene, camera);
     }
